@@ -8,7 +8,7 @@ class IniFile
 
   # :stopdoc:
   class Error < StandardError; end
-  VERSION = '0.2.0'
+  VERSION = '0.2.1'
   # :startdoc:
 
   #
@@ -38,8 +38,8 @@ class IniFile
   #    :comment => ';'      The line comment character(s)
   #    :parameter => '='    The parameter / value separator
   #
-  def initialize( filename, opts = {} )
-    @fn = filename
+  def initialize( filename_or_io, opts = {} )
+    @fn = filename_or_io
     @comment = opts[:comment] || ';'
     @param = opts[:parameter] || '='
     @ini = Hash.new {|h,k| h[k] = Hash.new}
@@ -50,7 +50,6 @@ class IniFile
 
     parse
   end
-
   #
   # call-seq:
   #    write
@@ -231,11 +230,22 @@ class IniFile
   # Parse the ini file contents.
   #
   def parse
-    return unless ::Kernel.test ?f, @fn
-    section = nil
+    if @fn.kind_of?(String) 
+      return unless ::Kernel.test ?f, @fn
+      section = nil
+  
+      ::File.open(@fn, 'r') do |f|
+        parse_io(f)
+      end  # File.open
+    elsif @fn.kind_of?(File)
+        parse_io(@fn)
+    elsif @fn.kind_of?(IO)
+      parse_io(@fn)
+    end
 
-    ::File.open(@fn, 'r') do |f|
-      while line = f.gets
+  end
+  def parse_io(io)
+      while line = io.gets
         line = line.chomp
 
         case line
@@ -256,10 +266,8 @@ class IniFile
         else
           raise Error, "could not parse line '#{line}"
         end
-      end  # while
-    end  # File.open
+      end  # while	
   end
-
 end  # class IniFile
 
 # EOF
