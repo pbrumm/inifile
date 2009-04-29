@@ -2,7 +2,7 @@ History.txt
 Manifest.txt
 README.txt
 Rakefile
-lib/inifile.rb
+lib/initools.rb
 tasks/annotations.rake
 tasks/doc.rake
 tasks/gem.rake

@@ -4,11 +4,12 @@
 # This class represents the INI file and can be used to parse, modify,
 # and write INI files.
 #
+module IniTools
 class IniFile
 
   # :stopdoc:
   class Error < StandardError; end
-  VERSION = '0.2.1'
+  VERSION = '0.2.2'
   # :startdoc:
 
   #
@@ -43,8 +44,10 @@ class IniFile
     @comment = opts[:comment] || ';'
     @param = opts[:parameter] || '='
     @ini = Hash.new {|h,k| h[k] = Hash.new}
+    @ini_comments = Hash.new {|h,k| h[k] = Hash.new}
+    @ini_section_comments = Hash.new {|h,k| h[k] = Array.new}
 
-    @rgxp_comment = %r/\A\s*\z|\A\s*[#{@comment}]/
+    @rgxp_comment = %r/\A\s*\z|\A\s*[#{@comment}](.*)\z/
     @rgxp_section = %r/\A\s*\[([^\]]+)\]/o
     @rgxp_param   = %r/\A([^#{@param}]+)#{@param}(.*)\z/
 
@@ -147,6 +150,49 @@ class IniFile
     @ini.keys
   end
 
+
+  #
+  # call-seq:
+  #    ini_file.comments(section)
+  #
+  # Get an array of comments for the _section_. 
+  #
+  def comments( section )
+    return nil if section.nil?
+    
+    @ini_section_comments[section.to_s]
+
+  end
+  #
+  # call-seq:
+  #    ini_file.comment(section)
+  #
+  # Get the possibly multiline comment for the _section_. 
+  #
+  def comment( section , param)
+    return nil if section.nil? ||  !@ini_comments.has_key?(section.to_s)
+    
+    @ini_comments[section][param]
+  end
+
+  #
+  # call-seq:
+  #    has_section?( section )
+  #
+  # Returns +true+ if the named _section_ exists in the INI file.
+  #
+  def has_comment?( section , param = nil)
+  	if param.nil?
+    	@ini_section_comments.has_key? section.to_s
+    elsif @ini_comments.has_key? section.to_s
+    	@ini_comments[section.to_s][param.to_s]
+    else
+    	false
+    end
+  end
+
+	
+
   #
   # call-seq:
   #    freeze
@@ -245,22 +291,47 @@ class IniFile
 
   end
   def parse_io(io)
+  	  unmatched_comments = []
+  	  section = nil
+  	  section_name = nil
+  	  section_comments = nil
+  	  section_attr_comments = nil
       while line = io.gets
         line = line.chomp
 
         case line
         # ignore blank lines and comment lines
-        when @rgxp_comment: next
+	     	when @rgxp_comment: 
+	     			unmatched_comments << $1.strip  if !$1.nil?
 
         # this is a section declaration
-        when @rgxp_section: section = @ini[$1.strip]
+        when @rgxp_section: 
+        	section_name = $1.strip
+        	section = @ini[section_name]
+        	section_attr_comments = @ini_comments[section_name]
+        	if unmatched_comments.size > 0
+        		@ini_section_comments[section_name] = unmatched_comments
+        		unmatched_comments = []
+        	end
 
         # otherwise we have a parameter
         when @rgxp_param
           begin
-            section[$1.strip] = $2.strip
+          	unmatched_comments = []
+          	attr_name = $1.strip
+          	attr_value = $2
+          	if !attr_value.nil?
+          		value, comment = attr_value.split(/[#{@comment}]/)
+          		if !comment.nil?
+	          			section_attr_comments[attr_name] = comment.strip
+	          	end
+          		value = value.strip
+          	else
+          		value = attr_value
+          	end
+            section[attr_name] = value
           rescue NoMethodError
-            raise Error, "parameter encountered before first section"
+            raise Error, "parameter encountered before first section #{$!}"
           end
 
         else
@@ -269,5 +340,5 @@ class IniFile
       end  # while	
   end
 end  # class IniFile
-
+end
 # EOF
