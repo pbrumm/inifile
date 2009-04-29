@@ -177,18 +177,26 @@ class IniFile
 
   #
   # call-seq:
-  #    has_section?( section )
+  #    has_comment?( section, param )
   #
-  # Returns +true+ if the named _section_ exists in the INI file.
+  # Returns +true+ if the named _section_ has a comment
   #
-  def has_comment?( section , param = nil)
-  	if param.nil?
-    	@ini_section_comments.has_key? section.to_s
-    elsif @ini_comments.has_key? section.to_s
-    	@ini_comments[section.to_s][param.to_s]
+  def has_comment?( section , param)
+    if @ini_comments.has_key? section.to_s
+    	@ini_comments[section.to_s].has_key?(param.to_s)
     else
     	false
     end
+  end
+
+  #
+  # call-seq:
+  #    has_comments?( section )
+  #
+  # Returns +true+ if the named _section_ has comments
+  #
+  def has_comments?( section)
+    @ini_section_comments.has_key? section.to_s
   end
 
 	

@@ -75,7 +75,11 @@ class TestIniFile < Test::Unit::TestCase
 		assert_equal "1", ini_file['section_one']["one"]
 		assert_equal "inline comment one", ini_file.comment("section_one", "one")
 		assert_equal "2", ini_file['section_one']["two"]
-		assert_equal "inline comment two", ini_file.comment("section_one", "two")
+		assert_equal true, ini_file.has_comment?("section_one", "one")
+		assert_equal false, ini_file.has_comment?("section_one", "two")
+		assert_equal nil, ini_file.comment("section_one", "two")
+		assert_equal true, ini_file.has_comments?("section_one")
+		assert_equal false, ini_file.has_comments?("section_two")
 
     # see if we can parse different style param separators
     assert_raise(IniTools::IniFile::Error) {IniTools::IniFile.load File.new('test/data/param.ini')}
