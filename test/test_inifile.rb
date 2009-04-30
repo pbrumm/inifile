@@ -19,6 +19,7 @@ class TestIniFile < Test::Unit::TestCase
     @contents = [
       ['section_one', 'one', '1'],
       ['section_one', 'two', '2'],
+      ['section_one', 'three', ''],
       ['section_two', 'three', '3'],
       ['section three', 'four', '4'],
       ['section three', 'five', '5'],
@@ -120,7 +121,7 @@ class TestIniFile < Test::Unit::TestCase
   def test_delete_section
     assert_nil @ini_file.delete_section('section_nil')
 
-    h = {'one' => '1', 'two' => '2'}
+    h = {'one' => '1', 'two' => '2', 'three' => ''}
     assert_equal true, @ini_file.has_section?('section_one')
     assert_equal h, @ini_file.delete_section('section_one')
     assert_equal false, @ini_file.has_section?('section_one')
@@ -216,7 +217,8 @@ class TestIniFile < Test::Unit::TestCase
   def test_index
     expected = {
       'one' => '1',
-      'two' => '2'
+      'two' => '2',
+      'three' => ''
     }
     assert_equal expected, @ini_file[:section_one]
 

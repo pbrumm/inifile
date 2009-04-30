@@ -306,7 +306,7 @@ class IniFile
   	  section_attr_comments = nil
       while line = io.gets
         line = line.chomp
-
+        
         case line
         # ignore blank lines and comment lines
 	     	when @rgxp_comment: 
@@ -328,7 +328,7 @@ class IniFile
           	unmatched_comments = []
           	attr_name = $1.strip
           	attr_value = $2
-          	if !attr_value.nil?
+          	if !attr_value.nil? && attr_value != ""
           		value, comment = attr_value.split(/[#{@comment}]/)
           		if !comment.nil?
 	          			section_attr_comments[attr_name] = comment.strip
