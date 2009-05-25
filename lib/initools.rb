@@ -9,7 +9,7 @@ class IniFile
 
   # :stopdoc:
   class Error < StandardError; end
-  VERSION = '0.2.2'
+  VERSION = '0.2.3'
   # :startdoc:
 
   #
@@ -329,7 +329,7 @@ class IniFile
           	attr_name = $1.strip
           	attr_value = $2
           	if !attr_value.nil? && attr_value != ""
-          		value, comment = attr_value.split(/[#{@comment}]/)
+          		value, comment = attr_value.split(/\t[#{@comment}]|   [#{@comment}]/)
           		if !comment.nil?
 	          			section_attr_comments[attr_name] = comment.strip
 	          	end

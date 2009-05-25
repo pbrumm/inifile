@@ -157,9 +157,8 @@ class TestIniFile < Test::Unit::TestCase
   def test_each
     ary = []
     @ini_file.each {|*args| ary << args}
-
     assert_equal @contents, ary.sort
-
+		assert true, !@ini_file["section-one"].has_key?(";four")
     ary = []
     IniTools::IniFile.new('temp.ini').each {|*args| ary << args}
     assert_equal [], ary
